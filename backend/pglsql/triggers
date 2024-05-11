@@ -1,0 +1,33 @@
+CREATE OR REPLACE FUNCTION prevent_product_deletion()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Check if the product is associated with any order items
+    IF EXISTS (SELECT 1 FROM OrderItem WHERE ProductId = OLD.idProduct) THEN
+        RAISE EXCEPTION 'Cannot delete product because it is associated with one or more order items.';
+    END IF;
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_product_delete
+BEFORE DELETE ON Products
+FOR EACH ROW EXECUTE FUNCTION prevent_product_deletion();
+
+
+CREATE OR REPLACE FUNCTION delete_category_if_empty()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Check if there are no more products in the category
+    IF NOT EXISTS (
+        SELECT 1 FROM Product_Category WHERE CategoryId = OLD.CategoryId
+    ) THEN
+        DELETE FROM Categories WHERE idCategory = OLD.CategoryId;
+    END IF;
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER after_product_category_update
+AFTER DELETE ON Product_Category
+FOR EACH ROW EXECUTE FUNCTION delete_category_if_empty();
+

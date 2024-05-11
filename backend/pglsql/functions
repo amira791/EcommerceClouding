@@ -1,0 +1,80 @@
+CREATE OR REPLACE FUNCTION ListProducts()
+RETURNS TABLE(idProduct INT, Name VARCHAR, quantity INT, price DECIMAL) AS $$
+BEGIN
+    RETURN QUERY SELECT idProduct, Name, quantity, price FROM Products;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+CREATE OR REPLACE FUNCTION FilterProducts(categoryName VARCHAR, priceLimit DECIMAL, minQuantity INT)
+RETURNS TABLE(idProduct INT, Name VARCHAR, quantity INT, price DECIMAL) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT p.idProduct, p.Name, p.quantity, p.price
+    FROM Products p
+    JOIN Product_Category pc ON p.idProduct = pc.ProductId
+    JOIN Categories c ON pc.CategoryId = c.idCategory
+    WHERE c.name = categoryName AND p.price <= priceLimit AND p.quantity >= minQuantity;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION FilterProductsByCategory(categoryName VARCHAR)
+RETURNS TABLE(idProduct INT, Name VARCHAR, quantity INT, price DECIMAL) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT p.idProduct, p.Name, p.quantity, p.price
+    FROM Products p
+    JOIN Product_Category pc ON p.idProduct = pc.ProductId
+    JOIN Categories c ON pc.CategoryId = c.idCategory
+    WHERE c.name = categoryName;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+CREATE OR REPLACE FUNCTION FilterProductsByPrice(priceLimit DECIMAL)
+RETURNS TABLE(idProduct INT, Name VARCHAR, quantity INT, price DECIMAL) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT idProduct, Name, quantity, price
+    FROM Products
+    WHERE price <= priceLimit;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION FilterProductsByQuantity(minQuantity INT)
+RETURNS TABLE(idProduct INT, Name VARCHAR, quantity INT, price DECIMAL) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT idProduct, Name, quantity, price
+    FROM Products
+    WHERE quantity >= minQuantity;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION CalculateTotalStockValue()
+RETURNS DECIMAL AS $$
+DECLARE
+    totalValue DECIMAL := 0;
+BEGIN
+    SELECT SUM(quantity * price) INTO totalValue FROM Products;
+    RETURN totalValue;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION GetProductDetails(productId INT)
+RETURNS TABLE(ProductName VARCHAR, Quantity INT, Price DECIMAL, Rating INT, Comment TEXT) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT p.Name, p.quantity, p.price, r.Rating, r.comment
+    FROM Products p
+    LEFT JOIN Reviews r ON p.idProduct = r.productId
+    WHERE p.idProduct = productId;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+

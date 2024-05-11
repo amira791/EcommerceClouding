@@ -1,0 +1,13 @@
+CREATE OR REPLACE PROCEDURE DeleteProduct(productId INT)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    
+    DELETE FROM OrderItem WHERE ProductId = productId;
+    DELETE FROM Product_Category WHERE ProductId = productId;
+
+   
+    DELETE FROM Products WHERE idProduct = productId;
+    COMMIT;
+END;
+$$;
