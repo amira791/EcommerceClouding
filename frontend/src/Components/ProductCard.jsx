@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaEdit, FaTrash } from 'react-icons/fa'; // Import icons from React Icons
+import axios from 'axios';
+
 
 function ProductCard({ product }) {
   const { idProduct, name, price, quantity, category, user } = product;
@@ -15,9 +17,17 @@ function ProductCard({ product }) {
   };
 
   // Function to handle delete action
-  const handleDelete = (event) => {
+  const handleDelete = async (event) => {
+    console.log(product)
     console.log('Delete product with ID:', idProduct);
-    setPopupDeleteOpen(false);
+    try {
+      const response = await axios.delete(`http://localhost:4000/api/v1/products/${idProduct}`);
+      setPopupDeleteOpen(false);
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      throw new Error('Error deleting product');
+    }
+   
   };
 
  

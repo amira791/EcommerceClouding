@@ -1,26 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect} from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, Title, Tooltip, Legend } from 'chart.js/auto';
+import axios from 'axios';
 
 ChartJS.register(Title, Tooltip, Legend);
 
 function CategoryProductCount() {
-  const [categoryData] = useState([
-    { categoryName: 'Category A', productCount: 25 },
-    { categoryName: 'Category B', productCount: 18 },
-    { categoryName: 'Category C', productCount: 30 },
-    { categoryName: 'Category D', productCount: 15 },
-    { categoryName: 'Category E', productCount: 22 },
-    { categoryName: 'Category A', productCount: 25 },
-    { categoryName: 'Category B', productCount: 18 },
-    { categoryName: 'Category C', productCount: 30 },
-    { categoryName: 'Category D', productCount: 15 },
-    { categoryName: 'Category E', productCount: 22 },
-    { categoryName: 'Category A', productCount: 25 },
-    { categoryName: 'Category B', productCount: 18 },
-    { categoryName: 'Category C', productCount: 30 },
-    { categoryName: 'Category D', productCount: 15 },
-    { categoryName: 'Category E', productCount: 22 },
+
+  useEffect(() => {
+    axios.get('http://localhost:4000/api/v1/category-product-count')
+    .then(response => {
+      setCategoryData(response.data);
+    })
+    .catch(error => {
+      console.error('Error fetching data from the server:', error);
+    });
+  
+  }, []);
+
+  const [categoryData , setCategoryData] = useState([
+    { category_name : 'Category A', product_count : 25 },
+    { category_name : 'Category B', product_count : 18 },
+    { category_name : 'Category C', product_count : 30 },
+    { category_name : 'Category D', product_count : 15 },
+    { category_name : 'Category E', product_count : 22 },
+    { category_name : 'Category A', product_count : 25 },
+    { category_name : 'Category B', product_count : 18 },
+    { category_name : 'Category C', product_count : 30 },
+    { category_name : 'Category D', product_count : 15 },
+    { category_name : 'Category E', product_count : 22 },
+    { category_name : 'Category A', product_count : 25 },
+    { category_name : 'Category B', product_count : 18 },
+    { category_name : 'Category C', product_count : 30 },
+    { category_name : 'Category D', product_count : 15 },
+    { category_name : 'Category E', product_count : 22 },
   ]);
 
 
@@ -29,8 +42,8 @@ function CategoryProductCount() {
     setNumberOfProducts(Number(event.target.value));
   };
   
-  const categoryNames = categoryData.map(category => category.categoryName);
-  const productCounts = categoryData.map(category => category.productCount).slice(0, numberOfProducts);
+  const categoryNames = categoryData.map(category => category.category_name );
+  const productCounts = categoryData.map(category => category.product_count ).slice(0, numberOfProducts);
   const data = {
     labels: categoryNames.slice(0, numberOfProducts),
     datasets: [

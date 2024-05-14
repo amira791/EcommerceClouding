@@ -27,6 +27,7 @@ function List() {
     axios.get('http://localhost:4000/api/v1/products')
       .then(response => {
         setProducts(response.data);
+        console.log(products)
       })
       .catch(error => {
         console.error('Error fetching data from the server:', error);

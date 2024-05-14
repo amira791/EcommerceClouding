@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { getCategories ,getProducts, getProduct, addProduct, deleteProduct, getFilteredProductsByCategory, getFilteredProductsByPriceRange, getFilteredProductsByQualityRange, getCategoryIdByName , get_most_commented_products,get_most_demanded_products,get_most_rated_products } from './data_functions/supabase.js';
+import { getCategories ,getProducts, getProduct, addProduct, deleteProduct,calculateTotalStockValue, calculateCategoryProductCount,getFilteredProductsByCategory, getFilteredProductsByPriceRange, getFilteredProductsByQualityRange, getCategoryIdByName , get_most_commented_products,get_most_demanded_products,get_most_rated_products } from './data_functions/supabase.js';
 
 const app = express();
 const port = 4000;
@@ -73,7 +73,7 @@ app.delete('/api/v1/products/:id', async (req, res) => {
   try {
     const { error } = await deleteProduct(productId);
     if (error) {
-      throw new Error(error.message);
+      throw new Error(error);
     }
     res.json({ message: 'Product deleted successfully' });
   } catch (error) {
@@ -90,6 +90,17 @@ app.get('/api/v1/total-stock-value', async (req, res) => {
   } catch (error) {
     console.error('Error calculating total stock value:', error);
     res.status(500).json({ error: 'Error calculating total stock value' });
+  }
+});
+
+// Endpoint to calculate category product count
+app.get('/api/v1/category-product-count', async (req, res) => {
+  try {
+    const result = await calculateCategoryProductCount();
+    res.json(result);
+  } catch (error) {
+    console.error('Error calculating category product count:', error);
+    res.status(500).json({ error: 'Error calculating category product count' });
   }
 });
 

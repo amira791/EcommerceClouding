@@ -11,6 +11,13 @@ function MostDemandedProducts() {
   const [endDate, setEndDate] = useState('');
   const [numberOfProducts, setNumberOfProducts] = useState(5);
 
+  useEffect(() => {
+    // Check if both startDate and endDate are set
+    if (startDate !== null && endDate !== null) {
+      getData(startDate, endDate);
+    }
+  }, [startDate, endDate]); 
+
   const getData = (start_date, end_date)=>{
     axios.get(`http://localhost:4000/api/v1/demanded/${start_date}/${end_date}`)
       .then(response => {
@@ -26,7 +33,6 @@ function MostDemandedProducts() {
 
   const handleEndDateChange = (event) => {
     setEndDate(event.target.value);
-    getData(startDate,endDate)
   };
 
   const handleNumberOfProductsChange = (event) => {

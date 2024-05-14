@@ -95,6 +95,7 @@ async function addProduct(product_name, product_quantity, product_price, categor
     .from('products')
     .delete()
     .eq('idproduct', id)
+    return error
   }
   
   
@@ -147,7 +148,7 @@ async function addProduct(product_name, product_quantity, product_price, categor
 
   async function calculateTotalStockValue() {
     try {
-        const { data, error } = await supabase.rpc('CalculateTotalStockValue');
+        const { data, error } = await supabase.rpc('calculatetotalstockvalue');
         if (error) {
             console.error('Error calculating total stock value:', error.message);
             return null;
@@ -157,6 +158,21 @@ async function addProduct(product_name, product_quantity, product_price, categor
         console.error('Error calculating total stock value:', error.message);
         return null;
     }
+}
+
+// Function to call the PostgreSQL function
+async function calculateCategoryProductCount() {
+  try {
+    const { data, error } = await supabase.rpc('calculatecategoryproductcount');
+    if (error) {
+        console.error('Error calculating count of categories:', error.message);
+        return null;
+    }
+    return data;
+} catch (error) {
+    console.error('Error calculating  count of categories:', error.message);
+    return null;
+}
 }
   async function get_most_commented_products() {
 
@@ -215,6 +231,7 @@ export {
   addProduct, 
   deleteProduct,
   calculateTotalStockValue,
+  calculateCategoryProductCount,
   supabase, 
   getFilteredProductsByCategory, 
   getFilteredProductsByPriceRange, 

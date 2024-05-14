@@ -93,6 +93,20 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION CalculateCategoryProductCount()
+RETURNS TABLE (category_name VARCHAR(100), product_count BIGINT) AS
+$$
+BEGIN
+    RETURN QUERY
+    SELECT c.name, COUNT(p.idProduct) AS product_count
+    FROM Categories c
+    LEFT JOIN Products p ON c.idCategory = p.idCategory
+    GROUP BY c.name;
+END;
+$$
+LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION GetProductDetails(productId INT)
 RETURNS TABLE(ProductName VARCHAR, Quantity INT, Price DECIMAL, Rating INT, Comment TEXT) AS $$
 BEGIN
