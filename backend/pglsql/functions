@@ -1,3 +1,32 @@
+CREATE OR REPLACE FUNCTION insert_product(
+    product_name VARCHAR(100),
+    product_price DECIMAL(10, 2),
+    product_quantity INT,
+    category_name VARCHAR(100)
+)
+RETURNS VOID AS
+$$
+DECLARE
+    category_id INT;
+BEGIN
+    -- Get the category ID based on the category name
+    SELECT idCategory INTO category_id
+    FROM Categories
+    WHERE name = category_name;
+
+    -- If the category does not exist, raise an exception
+    IF category_id IS NULL THEN
+        RAISE EXCEPTION 'Category % does not exist', category_name;
+    END IF;
+
+    -- Insert the product into the Products table
+    INSERT INTO Products (Name, price, quantity, idCategory)
+    VALUES (product_name, product_price, product_quantity, category_id);
+END;
+$$
+LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION ListProducts()
 RETURNS TABLE(idProduct INT, Name VARCHAR, quantity INT, price DECIMAL) AS $$
 BEGIN
@@ -76,5 +105,86 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR replace FUNCTION category_with_most_products()
+RETURNS TABLE (category_name VARCHAR(50), total_products BIGINT)
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT c.name, COUNT(pc.ProductId) AS total_products
+    FROM Categories c
+    LEFT JOIN Product_Category pc ON c.idCategory = pc.CategoryId
+    GROUP BY c.name
+    ORDER BY total_products DESC
+    LIMIT 1;
+END;
+$$ LANGUAGE plpgsql;
 
 
+
+CREATE OR replace FUNCTION most_commented_products()
+RETURNS TABLE (product_name VARCHAR(100), total_comments BIGINT)
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT p.Name, COUNT(r.idReview) AS total_comments
+    FROM Products p
+    LEFT JOIN Reviews r ON p.idProduct = r.productId
+    GROUP BY p.Name
+    ORDER BY total_comments DESC
+    LIMIT 10;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION most_demanded_products(start_date DATE, end_date DATE)
+RETURNS TABLE (product_name VARCHAR(100), total_quantity BIGINT)
+AS $$
+
+BEGIN
+    RETURN QUERY
+    SELECT p.Name, SUM(oi.quantity) AS total_quantity
+    FROM Orders o
+    INNER JOIN OrderItem oi ON o.idOrder = oi.OrderId
+    INNER JOIN Products p ON oi.ProductId = p.idProduct
+    WHERE o.OrderDate BETWEEN start_date AND end_date
+    GROUP BY p.Name
+    HAVING SUM(oi.quantity) != 0
+    ORDER BY total_quantity DESC
+    LIMIT 10;
+END;
+
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR replace FUNCTION most_rated_products()
+RETURNS TABLE (product_name VARCHAR(100), avg_rating BIGINT)
+AS $$
+
+BEGIN
+    RETURN QUERY
+    SELECT p.Name, AVG(r.Rating) AS avg_rating
+    FROM Products p
+    LEFT JOIN Reviews r ON p.idProduct = r.productId
+    GROUP BY p.Name
+    HAVING AVG(r.Rating) IS NOT NULL
+    ORDER BY avg_rating DESC
+    LIMIT 10;
+END;
+
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR replace FUNCTION most_expensive_and_demanded_products()
+RETURNS TABLE (product_name VARCHAR(100), total_quantity BIGINT)
+AS $$
+
+BEGIN
+    RETURN QUERY
+    SELECT p.Name, SUM(oi.quantity) AS total_quantity
+    FROM Products p
+    INNER JOIN OrderItem oi ON p.idProduct = oi.ProductId
+    GROUP BY p.Name
+    HAVING SUM(oi.quantity) != 0
+    ORDER BY AVG(p.price) DESC, total_quantity DESC
+    LIMIT 10;
+END;
+$$ LANGUAGE plpgsql;

@@ -1,50 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, Title, Tooltip, Legend } from 'chart.js/auto';
+import axios from 'axios';
 
 ChartJS.register(Title, Tooltip, Legend);
 
-function MostDemandedProducts({ }) {
-    const products = [
-        { name: 'Product A', numberOfSales: 50, date: '2024-04-04' },
-        { name: 'Product B', numberOfSales: 40, date: '2024-04-02' },
-        { name: 'Product C', numberOfSales: 30, date: '2024-04-03' },
-        { name: 'Product D', numberOfSales: 25, date: '2024-04-04' },
-        { name: 'Product E', numberOfSales: 20, date: '2024-04-05' },
-        { name: 'Product F', numberOfSales: 18, date: '2024-04-06' },
-        { name: 'Product G', numberOfSales: 15, date: '2024-04-07' },
-        { name: 'Product H', numberOfSales: 12, date: '2024-04-08' },
-        { name: 'Product I', numberOfSales: 10, date: '2024-04-09' },
-        { name: 'Product J', numberOfSales: 8, date: '2024-04-10' },
-        { name: 'Product K', numberOfSales: 6, date: '2024-04-11' },
-        { name: 'Product L', numberOfSales: 4, date: '2024-04-12' },
-        { name: 'Product M', numberOfSales: 3, date: '2024-04-13' },
-        { name: 'Product N', numberOfSales: 2, date: '2024-04-14' },
-        { name: 'Product O', numberOfSales: 1, date: '2024-04-15' }
-      ];
-      
+function MostDemandedProducts() {
+  const [productsData, setProductsData] = useState([]);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [numberOfProducts, setNumberOfProducts] = useState(5); // Default to 5 products
+  const [numberOfProducts, setNumberOfProducts] = useState(5);
 
+  const getData = (start_date, end_date)=>{
+    axios.get(`http://localhost:4000/api/v1/demanded/${start_date}/${end_date}`)
+      .then(response => {
+        setProductsData(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching data from the server:', error);
+      });
+  }
   const handleStartDateChange = (event) => {
     setStartDate(event.target.value);
   };
+
   const handleEndDateChange = (event) => {
     setEndDate(event.target.value);
+    getData(startDate,endDate)
   };
+
   const handleNumberOfProductsChange = (event) => {
     setNumberOfProducts(Number(event.target.value));
   };
-  const filteredProducts = products.filter(product => {
+
+  const filteredProducts = productsData.filter(product => {
     const startDateMs = startDate ? new Date(startDate).getTime() : 0;
     const endDateMs = endDate ? new Date(endDate).getTime() : Infinity;
     const productDateMs = new Date(product.date).getTime();
     return productDateMs >= startDateMs && productDateMs <= endDateMs;
   });
 
-  const productNames = filteredProducts.slice(0, numberOfProducts).map(product => product.name);
-  const numberOfSales = filteredProducts.slice(0, numberOfProducts).map(product => product.numberOfSales);
+  const productNames = productsData.slice(0, numberOfProducts).map(product => product.product_name);
+  const numberOfSales = productsData.slice(0, numberOfProducts).map(product => product.total_quantity);
 
   const data = {
     labels: productNames, 
@@ -58,6 +55,7 @@ function MostDemandedProducts({ }) {
       },
     ],
   };
+
   const options = {
     scales: {
       y: {

@@ -1,9 +1,26 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = 'https://fxkxxuygclgsveyvqfub.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4a3h4dXlnY2xnc3ZleXZxZnViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTM4MDQwNDYsImV4cCI6MjAyOTM4MDA0Nn0.IwKaizZsrDPfoxlTDS-o-rfcHmjUNFjcKjP9pRfyU58';
+const supabaseUrl = 'https://qplsbysryzkhjorhivri.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwbHNieXNyeXpraGpvcmhpdnJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTM4Njg3ODcsImV4cCI6MjAyOTQ0NDc4N30.Ciw2ExRcTDcwU4RrhwaHo14bAoa_5GmqlZuinhJLH_4';
 
 const supabase = createClient(supabaseUrl, supabaseKey);
+
+async function getCategories() {
+  try {
+      const { data, error } = await supabase
+          .from('categories')
+          .select();
+
+      if (error) {
+          throw new Error(error.message);
+      }
+
+      return { data, error: null };
+  } catch (error) {
+      console.error('Error fetching categories:', error.message);
+      return { data: null, error: 'Error fetching categories' };
+  }
+}
 
 async function getProducts() {
     try {
@@ -53,22 +70,23 @@ async function getCategoryIdByName(categoryName) {
 
 
 // Corrected function to add a new product
-async function addProduct(info) {
-    try {
-        const { data, error } = await supabase.from('products').insert([
-            {
-                name: info.name,
-                quantity: info.quantity,
-                price: info.price,
-                idcategory: info.categoryId  // Corrected to match the variable name
-            }
-        ]);  
-        return { data, error };
-    } catch (error) {
-        console.error('Error adding product:', error.message);
-        return { data: null, error: error.message };
-    }
+async function addProduct(product_name, product_quantity, product_price, category_name) {
+  try {
+      const { data, error } = await supabase
+      .rpc('insert_product', {
+        category_name, 
+        product_name, 
+        product_price, 
+        product_quantity
+      })
+
+      return { data, error };
+  } catch (error) {
+      console.error('Error adding product:', error.message);
+      return { data: null, error: error.message };
+  }
 }
+
 
 
   
@@ -126,6 +144,83 @@ async function addProduct(info) {
   
     return { data, error: null };
   }
+
+  async function calculateTotalStockValue() {
+    try {
+        const { data, error } = await supabase.rpc('CalculateTotalStockValue');
+        if (error) {
+            console.error('Error calculating total stock value:', error.message);
+            return null;
+        }
+        return data;
+    } catch (error) {
+        console.error('Error calculating total stock value:', error.message);
+        return null;
+    }
+}
+  async function get_most_commented_products() {
+
+    // let { data, error } = await supabase
+    // .rpc('most_commented_products')
+    // if (error) console.error(error)
+    // else console.log(data)
+
+    try {
+      const { data, error } = await supabase.rpc('most_commented_products');
+      if (error) {
+        throw new Error(error.message);
+      }
+      return { data, error: null };
+    } catch (error) {
+      console.error('Error fetching most commented products:', error.message);
+      return { data: data, error: error };
+    }
+  }
   
   
-export { getProducts, getProduct, addProduct, deleteProduct,supabase, getFilteredProductsByCategory, getFilteredProductsByPriceRange, getFilteredProductsByQualityRange, getCategoryIdByName };
+  async function get_most_rated_products(){
+    try {
+     
+      let { data, error } = await supabase
+      .rpc('most_rated_products')
+      if (error) {
+        throw new Error(error.message);
+      }
+      return { data, error: null };
+    } catch (error) {
+      console.error('Erreur lors de recuperation des produits plus commentes', error.message);
+      return { data: null, error: error.message };
+    }
+  }
+  
+  async function get_most_demanded_products( start_date, end_date ){
+   
+    try {
+      const {data , error} = await supabase.rpc('most_demanded_products', { start_date, end_date })
+      if (error) {
+        throw new Error(error.message);
+      }
+      return { data, error: null };
+    } catch (error) {
+      console.error('Erreur lors de recuperation des produits plus commentes', error.message);
+      return { data: null, error: error.message };
+    }
+  }
+  
+  
+export { 
+  getCategories,
+  getProducts, 
+  getProduct, 
+  addProduct, 
+  deleteProduct,
+  calculateTotalStockValue,
+  supabase, 
+  getFilteredProductsByCategory, 
+  getFilteredProductsByPriceRange, 
+  getFilteredProductsByQualityRange, 
+  getCategoryIdByName,
+  get_most_demanded_products,
+  get_most_rated_products,
+  get_most_commented_products
+ };

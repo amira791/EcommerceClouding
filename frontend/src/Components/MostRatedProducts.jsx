@@ -1,27 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState ,useEffect } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, Title, Tooltip, Legend } from 'chart.js/auto';
-
+import axios from 'axios';
 ChartJS.register(Title, Tooltip, Legend);
 
 function MostRatedProducts() {
+
+  useEffect(() => {
+    axios.get('http://localhost:4000/api/v1/rated')
+      .then(response => {
+        setProductsData(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching data from the server:', error);
+      });
+  }, []); 
   // Sample data for the most rated products
-  const [productsData] = useState([
-    { productName: 'Product A', rating: 4.3 },
-    { productName: 'Product B', rating: 5 },
-    { productName: 'Product C', rating: 4.5 },
-    { productName: 'Product D', rating: 3.4 },
-    { productName: 'Product E', rating: 4.2 },
-    { productName: 'Product F', rating: 4.7 },
-    { productName: 'Product G', rating: 5 },
-    { productName: 'Product H', rating: 3 },
-    { productName: 'Product I', rating: 2 },
-    { productName: 'Product J', rating: 4.8 },
-    { productName: 'Product K', rating: 3 },
-    { productName: 'Product L', rating: 5 },
-    { productName: 'Product M', rating: 2 },
-    { productName: 'Product N', rating: 3 },
-    { productName: 'Product O', rating: 4 },
+  const [productsData,setProductsData] = useState([
+    { product_name: 'Product A', avg_rating: 4.3 },
+    { product_name: 'Product B', avg_rating: 5 },
+    { product_name: 'Product C', avg_rating: 4.5 },
+    { product_name: 'Product D', avg_rating: 3.4 },
+    { product_name: 'Product E', avg_rating: 4.2 },
+    { product_name: 'Product F', avg_rating: 4.7 },
+    { product_name: 'Product G', avg_rating: 5 },
+    { product_name: 'Product H', avg_rating: 3 },
+    { product_name: 'Product I', avg_rating: 2 },
+    { product_name: 'Product J', avg_rating: 4.8 },
+    { product_name: 'Product K', avg_rating: 3 },
+    { product_name: 'Product L', avg_rating: 5 },
+    { product_name: 'Product M', avg_rating: 2 },
+    { product_name: 'Product N', avg_rating: 3 },
+    { product_name: 'Product O', avg_rating: 4 },
   ]);
 
   
@@ -30,10 +40,10 @@ function MostRatedProducts() {
     setNumberOfProducts(Number(event.target.value));
   };
   const filteredProductsData = productsData
-    .sort((a, b) => b.rating - a.rating)
+    .sort((a, b) => b.avg_rating - a.avg_rating)
     .slice(0, numberOfProducts);
-  const productNames = filteredProductsData.map(product => product.productName);
-  const ratings = filteredProductsData.map(product => product.rating);
+  const productNames = filteredProductsData.map(product => product.product_name);
+  const ratings = filteredProductsData.map(product => product.avg_rating);
 
   const data = {
     labels: productNames,

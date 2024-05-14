@@ -1,34 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect } from 'react';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, Title, Tooltip, Legend } from 'chart.js/auto';
+import axios from 'axios';
 
 ChartJS.register(Title, Tooltip, Legend);
 
 function MostCommentedProducts() {
-  const [productsData] = useState([
-    { productName: 'Product A', numberOfComments: 30 },
-    { productName: 'Product B', numberOfComments: 25 },
-    { productName: 'Product C', numberOfComments: 20 },
-    { productName: 'Product D', numberOfComments: 15 },
-    { productName: 'Product E', numberOfComments: 10 },
-    { productName: 'Product A', numberOfComments: 30 },
-    { productName: 'Product B', numberOfComments: 25 },
-    { productName: 'Product C', numberOfComments: 20 },
-    { productName: 'Product D', numberOfComments: 15 },
-    { productName: 'Product E', numberOfComments: 10 },
-    { productName: 'Product A', numberOfComments: 30 },
-    { productName: 'Product B', numberOfComments: 25 },
-    { productName: 'Product C', numberOfComments: 20 },
-    { productName: 'Product D', numberOfComments: 15 },
-    { productName: 'Product E', numberOfComments: 10 },
+  useEffect(() => {
+    axios.get('http://localhost:4000/api/v1/commented')
+      .then(response => {
+        setProductsData(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching data from the server:', error);
+      });
+  }, []); // Empty dependency array to ensure this effect runs only once on mount
+
+  const [productsData , setProductsData] = useState([
+    { product_name: 'Product A', total_comments: 30 },
+    { product_name: 'Product B', total_comments: 25 },
+    { product_name: 'Product C', total_comments: 20 },
+    { product_name: 'Product D', total_comments: 15 },
+    { product_name: 'Product E', total_comments: 10 },
+    { product_name: 'Product A', total_comments: 30 },
+    { product_name: 'Product B', total_comments: 25 },
+    { product_name: 'Product C', total_comments: 20 },
+    { product_name: 'Product D', total_comments: 15 },
+    { product_name: 'Product E', total_comments: 10 },
+    { product_name: 'Product A', total_comments: 30 },
+    { product_name: 'Product B', total_comments: 25 },
+    { product_name: 'Product C', total_comments: 20 },
+    { product_name: 'Product D', total_comments: 15 },
+    { product_name: 'Product E', total_comments: 10 },
   ]);
   const [numberOfProducts, setNumberOfProducts] = useState(5); // Default to 5 products
   const handleNumberOfProductsChange = (event) => {
     setNumberOfProducts(Number(event.target.value));
   };
   const filteredProductsData = productsData.slice(0, numberOfProducts);
-  const productNames = filteredProductsData.map(product => product.productName);
-  const numberOfComments = filteredProductsData.map(product => product.numberOfComments);
+  const productNames = filteredProductsData.map(product => product.product_name);
+  const numberOfComments = filteredProductsData.map(product => product.total_comments);
   const data = {
     labels: productNames,
     datasets: [

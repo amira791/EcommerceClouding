@@ -14,7 +14,7 @@ function Dashboard() {
   return (
     <>
       <Navbar/>
-      <div classname=' p-60'>
+      <div className=' p-60'>
       <div className='px-10 mb-4 flex flex-row justify-between items-center'>
       <IconButton icon={<FiShoppingBag />} path="/products" name="See all products"/>
       <TotalStockValue/>

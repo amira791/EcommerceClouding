@@ -31,3 +31,22 @@ CREATE TRIGGER after_product_category_update
 AFTER DELETE ON Product_Category
 FOR EACH ROW EXECUTE FUNCTION delete_category_if_empty();
 
+
+CREATE OR REPLACE FUNCTION update_average_rating()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE Products
+    SET avg_rating = (
+        SELECT AVG(Rating) 
+        FROM Reviews 
+        WHERE productId = NEW.productId
+    )
+    WHERE idProduct = NEW.productId;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER after_insert_review
+AFTER INSERT ON Reviews
+FOR EACH ROW
+EXECUTE FUNCTION update_average_rating();

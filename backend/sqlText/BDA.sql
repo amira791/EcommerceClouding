@@ -36,10 +36,6 @@ CREATE TABLE Reviews (
     FOREIGN KEY (UserId) REFERENCES Users(idUser)
 );
 
-
-
-
-
 CREATE TABLE Categories (
     idCategory INT PRIMARY KEY,
     name VARCHAR(50)
@@ -48,7 +44,9 @@ CREATE TABLE Products (
     idProduct INT PRIMARY KEY,
     Name VARCHAR(100),
     quantity INT,
-    price DECIMAL(10, 2)
+    price DECIMAL(10, 2),
+    idCategory INT,
+    FOREIGN KEY (idCategory) REFERENCES Categories(idCategory)
 );
 
 
