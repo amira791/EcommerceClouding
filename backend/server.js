@@ -104,16 +104,14 @@ app.get('/api/v1/category-product-count', async (req, res) => {
   }
 });
 
-// Filter products by category
-app.get('/api/v1/products/filterByCategory', async (req, res) => {
+// Endpoint for filtering products by category
+app.get('/api/v1/products/filterByCategory/:categoryName', async (req, res) => {
   try {
-    const { categoryId } = req.query;
-    const { data, error } = await getFilteredProductsByCategory(categoryId);
-
+    const { categoryName } = req.params; // Extract category ID from URL params
+    const { data, error } = await getFilteredProductsByCategory(categoryName);
     if (error) {
       throw new Error(error.message);
     }
-
     res.json(data);
   } catch (error) {
     console.error('Error fetching filtered products by category:', error);
@@ -153,20 +151,6 @@ app.get('/api/v1/products/filterByPrice', async (req, res) => {
 });
 
 
-// Endpoint for filtering products by category
-app.get('/api/v1/products/filterByCategory/:catgId', async (req, res) => {
-  try {
-    const { catgId } = req.params; // Extract category ID from URL params
-    const { data, error } = await getFilteredProductsByCategory(catgId);
-    if (error) {
-      throw new Error(error.message);
-    }
-    res.json(data);
-  } catch (error) {
-    console.error('Error fetching filtered products by category:', error);
-    res.status(500).json({ error: 'Error fetching filtered products by category' });
-  }
-});
 
 
 // Endpoint for filtering products by price range

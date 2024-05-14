@@ -22,6 +22,8 @@ function List() {
     { idCategorie: 2, name: 'Category 2' },
   ]);
 
+  const [selectedCategory, setSelectedCategory] = useState('');
+
 
   useEffect(() => {
     axios.get('http://localhost:4000/api/v1/products')
@@ -41,6 +43,18 @@ function List() {
       });
   }, []); 
 
+  useEffect(() => {
+    console.log(selectedCategory)
+    axios.get(`http://localhost:4000/api/v1/products/filterByCategory/${selectedCategory}`)
+    .then(response => {
+      setProducts(response.data);
+    })
+    .catch(error => {
+      console.error('Error fetching data from the server:', error);
+    });
+  }, [selectedCategory]); 
+
+
   const handleSearchChange = (event) => {
     // Fetch data from backend based on search query
     const searchQuery = event.target.value;
@@ -58,18 +72,11 @@ function List() {
     const minQuantity = event.target.value;
     console.log('Min quantity:', minQuantity);
   };
-  const [selectedCategory, setSelectedCategory] = useState('');
+
 
   const handleCategoryChange = (event) => {
-    setSelectedCategory(event.target);
-    // axios.get('http://localhost:4000/api/v1/products/filterByCategory' , {categoryId : selectedCategory.idcategory})
-    // .then(response => {
-    //   setProducts(response.data);
-    // })
-    // .catch(error => {
-    //   console.error('Error fetching data from the server:', error);
-    // });
-    console.log(selectedCategory);
+    const selectedCategoryId = event.target.value;
+    setSelectedCategory(selectedCategoryId);
   };
 
 

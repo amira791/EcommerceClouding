@@ -54,8 +54,7 @@ BEGIN
     RETURN QUERY
     SELECT p.idProduct, p.Name, p.quantity, p.price
     FROM Products p
-    JOIN Product_Category pc ON p.idProduct = pc.ProductId
-    JOIN Categories c ON pc.CategoryId = c.idCategory
+    JOIN Categories c ON p.CategoryId = c.idCategory
     WHERE c.name = categoryName;
 END;
 $$ LANGUAGE plpgsql;

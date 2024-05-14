@@ -99,17 +99,12 @@ async function addProduct(product_name, product_quantity, product_price, categor
   }
   
   
-  async function getFilteredProductsByCategory(categoryId) {
+  async function getFilteredProductsByCategory(categoryname) {
     try {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('idcategory', categoryId);
-      
+      let { data, error } = await supabase.rpc('filterproductsbycategory', {categoryname})
       if (error) {
         return { error };
-      }
-      
+      }  
       return { data, error: null };
     } catch (error) {
       console.error('Error fetching filtered products by category:', error.message);
