@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaEdit, FaTrash } from 'react-icons/fa'; // Import icons from React Icons
 import axios from 'axios';
 
 
-function ProductCard({ product }) {
-  const { idProduct, name, price, quantity, category, user } = product;
+function ProductCard({ idProduct, name, price, quantity, category, user }) {
+  
   const [isPopupdeleteOpen, setPopupDeleteOpen] = useState(false);
   const [isPopupUpdateOpen, setPopupUpdateOpen] = useState(false); 
-  const [updatedProduct, setUpdatedProduct] = useState({ name, price, quantity, category, user });
+  const [updatedProduct, setUpdatedProduct] = useState({ idProduct , name, price, quantity, category, user });
   const deletePopup = () => {
     setPopupDeleteOpen(!isPopupdeleteOpen);
   };
@@ -16,12 +16,13 @@ function ProductCard({ product }) {
     setPopupUpdateOpen(!isPopupUpdateOpen);
   };
 
+  
   // Function to handle delete action
   const handleDelete = async (event) => {
-    console.log(product)
+    console.log(idProduct)
     console.log('Delete product with ID:', idProduct);
     try {
-      const response = await axios.delete(`http://localhost:4000/api/v1/products/${idProduct}`);
+      await axios.delete(`http://localhost:4000/api/v1/products/${idProduct}`);
       setPopupDeleteOpen(false);
     } catch (error) {
       console.error('Error deleting product:', error);
@@ -32,11 +33,16 @@ function ProductCard({ product }) {
 
  
   
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    //the update here 
-    console.log('Update product with ID:', idProduct);
-    console.log('Updated Product:', updatedProduct);
+    try {
+      await axios.delete(`http://localhost:4000/api/v1/updateProduct` , updatedProduct);
+      setPopupDeleteOpen(false);
+    } catch (error) {
+      console.error('Error updating product:', error);
+      throw new Error('Error updating product');
+    }
+
     setPopupUpdateOpen(false);
   };
 
@@ -54,7 +60,8 @@ function ProductCard({ product }) {
             <div className="font-bold text-xl mb-2">{name}</div>
             <p className="text-HardGreen text-base">
               Price: {price}<br />
-              Quantity: {quantity}
+              Quantity: {quantity} <br />
+              Id : {idProduct}
             </p>
           </div>
         </div>

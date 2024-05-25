@@ -1,22 +1,46 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { FaArrowLeft, FaStar, FaTrash } from 'react-icons/fa'; 
 import Navbar from '../Components/Navbar';
-function ProductDetails( ) {
+import axios from 'axios';
+
+function ProductDetails() {
   
 const [isDeletePopupOpen, setDeletePopupOpen] = useState(false);
-const toggleDeletePopup = () => {
-  setDeletePopupOpen(!isDeletePopupOpen);
-};
-  const products = Array.from({ length: 20 }, (_, index) => ({
-    idProduct: index + 1,
-    name: `Product ${index + 1}`,
-    price: `$${(index + 1) * 10}`,
-    quantity: index + 1,
-    category: `Category ${(index % 5) + 1}`, 
-    user: `User ${index + 1}`, 
-  }));  
-  const reviews = [
+const toggleDeletePopup = () => {setDeletePopupOpen(!isDeletePopupOpen)}
+// id product depuis URL
+const {id} = useParams();
+
+console.log(id);  
+
+const [product,setProduct] = useState({
+  name: 'Product 1',
+  price: 10000,
+  quantity: 20,
+  category: 'Category 1', 
+});  
+
+useEffect(() => {
+  axios.get(`http://localhost:4000/api/v1/products/${id}`)
+  .then(response => {
+    setProduct(response.data[0]);
+  })
+  .catch(error => {
+    console.error('Error fetching data from the server:', error);
+  });
+
+  axios.get(`http://localhost:4000/api/v1/product/reviews/${id}`)
+  .then(response => {
+    setReviews(response.data);
+  })
+  .catch(error => {
+    console.error('Error fetching data from the server:', error);
+  });
+
+
+}, []);
+
+  const [reviews, setReviews] = useState([
     {
       id: 1,
       productId: 1,
@@ -62,23 +86,17 @@ const toggleDeletePopup = () => {
       comment: "Very satisfied with the product.",
       date: "2024-04-29"
     }
-  ];
+  ]);
   
-  // id product depuis URL
-  const idProduct = useParams();
-  console.log(idProduct); 
-  const product = products.find(product => product.idProduct=== parseInt(idProduct.id));
-const productReviews = reviews.filter(review => review.productId === parseInt(idProduct.id));
-
-
-
+  // const product = products.find(product => product.idProduct=== parseInt(idProduct.id));
+  // const productReviews = reviews.filter(review => review.productId === parseInt(idProduct.id));
 
 const deleteReview = () => {
   console.log('Avis supprimé');
   setDeletePopupOpen(false);
 };
 
-const averageRating = productReviews.reduce((total, review) => total + review.rating, 0) / productReviews.length;
+ const averageRating = reviews.reduce((total, review) => total + review.rating, 0) / reviews.length;
 
 return (
   <>
@@ -97,18 +115,17 @@ return (
           <span className="font-semibold ">Price : </span> {product.price}<br />
           <span className="font-semibold">Quantity : </span> {product.quantity}<br />
           <span className="font-semibold">Category : </span> {product.category}<br />
-          <span className="font-semibold">User : </span> {product.user}
         </p>
         <img className="w-1/2 rounded-full" src='/img.jpg' alt={product.name} />
         </div>
         <div className="flex items-center mb-4">
           <span className="m-2 text-2xl text-HardGreen">Average Rating : </span>
-          {Array.from({ length: Math.round(averageRating) }, (_, index) => (
+          {Array.from({ length: Math.round(product.rating) }, (_, index) => (
             <FaStar key={index} className="text-yellow-500" />
           ))}
         </div>
         <p className='text-2xl font-bold mb-2'>Views : </p>
-        {productReviews.map((review, index) => (
+        {reviews.map((review, index) => (
           <div key={index} className="bg-gray-100 rounded-lg p-4 mb-4">
           <div className=' flex justify-between items-center w-full'>
             <div className="flex items-center justify-start mb-2">
