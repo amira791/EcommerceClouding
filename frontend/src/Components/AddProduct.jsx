@@ -1,15 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaPlus } from 'react-icons/fa';
 import axios from 'axios';
 
 function AddProduct() {
   const [isAddPopupOpen, setAddPopupOpen] = useState(false);
+  const [categories, setCategories] = useState([]);
   const [newProduct, setNewProduct] = useState({
     name: '',
     price: '',
     quantity: '',
     category: ''
   });
+
+  useEffect(() => {
+      axios.get('http://localhost:4000/api/v1/categories')
+      .then(response => {
+        setCategories(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching data from the server:', error);
+      });
+  }, []); 
 
   const handleAddProduct = () => {
     setAddPopupOpen(true);
@@ -62,8 +73,29 @@ function AddProduct() {
                 <input type="number" id="quantity" name="quantity" value={newProduct.quantity} onChange={handleChange} className="w-full px-3 py-2 border rounded-md" placeholder="Quantity" />
               </div>
               <div className="mb-2">
-                <label htmlFor="category" className="block text-HardGreen font-semibold mb-1">Category:</label>
-                <input type="text" id="category" name="category" value={newProduct.category} onChange={handleChange} className="w-full px-3 py-2 border rounded-md" placeholder="Category" />
+                <label
+                  htmlFor="CategoryId"
+                  className="block text-HardGreen font-semibold mb-1"
+                >
+                  Category:
+                </label>
+                <select
+                  id="CategoryId"
+                  name="category"
+                  value={newProduct.category}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border rounded-md"
+                >
+                  <option value="" disabled hidden>
+                    Select a category
+                  </option>
+                  {categories.map(category => (
+                    <option key={category.idCategorie} value={category.idCategorie}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+
               </div>
               {/* <div className="mb-2">
               <label htmlFor="user" className="block text-HardGreen font-semibold mb-1">User:</label>

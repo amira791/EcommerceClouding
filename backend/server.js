@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { getCategories ,getProducts, getProduct, addProduct, deleteProduct,calculateTotalStockValue, calculateCategoryProductCount,getFilteredProductsByCategory, getFilteredProductsByPriceRange, getFilteredProductsByQualityRange, getCategoryIdByName , get_most_commented_products,get_most_demanded_products,get_most_rated_products } from './data_functions/supabase.js';
+import { getCategories ,getProducts, getProduct,getProductReviews, deleteReview,addProduct, deleteProduct,calculateTotalStockValue, calculateCategoryProductCount,getFilteredProductsByCategory, getFilteredProductsByPriceRange, getFilteredProductsByQualityRange, getCategoryIdByName , get_most_commented_products,get_most_demanded_products,get_most_rated_products, updateProduct } from './data_functions/supabase.js';
 
 const app = express();
 const port = 4000;
@@ -71,14 +71,70 @@ app.post('/api/v1/products', async (req, res) => {
 app.delete('/api/v1/products/:id', async (req, res) => {
   const productId = req.params.id;
   try {
-    const { error } = await deleteProduct(productId);
+    const error = await deleteProduct(productId); // Call the deleteProduct function and get the error if any
+
     if (error) {
-      throw new Error(error);
+      console.error('Error deleting product:', error);
+      return res.status(500).json({ error: 'Error deleting product' });
     }
-    res.json({ message: 'Product deleted successfully' });
+
+    // Respond with success message if there is no error
+    res.status(200).json({ message: 'Product deleted successfully' });
   } catch (error) {
     console.error('Error deleting product:', error);
     res.status(500).json({ error: 'Error deleting product' });
+  }
+});
+
+
+app.post('/api/v1/updateProduct', async (req, res) => {
+
+  try {
+    const { idProduct, name,quantity, price, category } = req.body;
+    const { data, error } =  await updateProduct(idProduct, name , quantity, price , category); // Corrected to match the variable name
+    if (error) {
+      throw new Error(error.message);
+    }
+    res.json(data);
+  } catch (error) {
+    console.error('Error updating product:', error);
+    res.status(500).json({ error: 'Error updating product' });
+  }
+
+});
+
+
+// Endpoint to get  product reviews
+app.get('/api/v1/product/reviews/:id', async (req, res) => {
+  const productId = req.params.id;
+  try {
+    const { data, error } =  await getProductReviews(productId); // Corrected to match the variable name
+    if (error) {
+      throw new Error(error.message);
+    }
+    res.json(data);
+  } catch (error) {
+    console.error('Error getting product reviews:', error);
+    res.status(500).json({ error: 'Error getting product reviews' });
+  }
+
+});
+
+// Endpoint to delete a review by ID
+app.delete('/api/v1/reviews/:id', async (req, res) => {
+  const reviewId = req.params.id;
+  try {
+    const error = await deleteReview(reviewId); // Call the deleteReview function and get the error if any
+
+    if (error) {
+      console.error('Error deleting product:', error);
+      return res.status(500).json({ error: 'Error deleting review' });
+    }
+    // Respond with success message if there is no error
+    res.status(200).json({ message: 'review deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    res.status(500).json({ error: 'Error deleting review' });
   }
 });
 
@@ -119,9 +175,9 @@ app.get('/api/v1/products/filterByCategory/:categoryName', async (req, res) => {
   }
 });
 
-app.get('/api/v1/products/filterByPrice', async (req, res) => {
+app.get('/api/v1/products/filterByPrice/:maxPrice', async (req, res) => {
   try {
-    const { minPrice, maxPrice } = req.query;
+    const { maxPrice } = req.params;
 
     // Check if minPrice and maxPrice are provided
     if (!minPrice || !maxPrice) {
@@ -152,28 +208,11 @@ app.get('/api/v1/products/filterByPrice', async (req, res) => {
 
 
 
-
-// Endpoint for filtering products by price range
-app.get('/api/v1/products/filterByPrice/:min/:max', async (req, res) => {
-  try {
-    const { min, max } = req.params; // Extract min and max price from URL params
-    const { data, error } = await getFilteredProductsByPriceRange(parseFloat(min), parseFloat(max));
-    if (error) {
-      throw new Error(error.message);
-    }
-    res.json(data);
-  } catch (error) {
-    console.error('Error fetching filtered products by price range:', error);
-    res.status(500).json({ error: 'Error fetching filtered products by price range' });
-  }
-});
-
-
 // Endpoint for filtering products by quality range
-app.get('/api/v1/products/filterByQuality/:min/:max', async (req, res) => {
+app.get('/api/v1/products/filterByQuality/:max', async (req, res) => {
   try {
-    const { min, max } = req.params; // Extract min and max quality from URL params
-    const { data, error } = await getFilteredProductsByQualityRange(parseInt(min), parseInt(max));
+    const { max } = req.params; // Extract min and max quality from URL params
+    const { data, error } = await getFilteredProductsByQualityRange(parseInt(max));
     if (error) {
       throw new Error(error.message);
     }

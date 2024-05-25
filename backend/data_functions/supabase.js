@@ -40,11 +40,29 @@ async function getProducts() {
 }
 
 async function getProduct(id){
-    let { data, error } = await supabase
-  .from('products')
-  .select()
-  .eq('idproduct', id)
+  let { data, error } = await supabase
+  .rpc('getproductdetails', {
+    id
+  })
   return { data, error }
+}
+
+async function getProductReviews(id){
+  
+  let { data, error } = await supabase
+  .rpc('getproductreviews', {
+    id
+  })
+  if (error) console.error(error)
+    return { data, error }
+}
+
+async function deleteReview(id){
+  const { error } = await supabase
+  .from('reviews')
+  .delete()
+  .eq('idreview', id)
+  return error
 }
 
 async function getCategoryIdByName(categoryName) {
@@ -74,10 +92,10 @@ async function addProduct(product_name, product_quantity, product_price, categor
   try {
       const { data, error } = await supabase
       .rpc('insert_product', {
-        category_name, 
         product_name, 
-        product_price, 
-        product_quantity
+        product_price,  
+        product_quantity,
+        category_name
       })
 
       return { data, error };
@@ -87,9 +105,25 @@ async function addProduct(product_name, product_quantity, product_price, categor
   }
 }
 
+// Corrected function to add a new product
+async function updateProduct(productid ,newname, newquantity, newprice, newcategoryname) {
+  try {
+      
+    let { data, error } = await supabase
+    .rpc('updateproduct', {
+      newcategoryname, 
+      newname, 
+      newprice, 
+      newquantity, 
+      productid
+    })
+      return { data, error };
+  } catch (error) {
+      console.error('Error adding product:', error.message);
+      return { data: null, error: error.message };
+  }
+}
 
-
-  
   async function deleteProduct(id){
   const { error } = await supabase
     .from('products')
@@ -223,7 +257,10 @@ export {
   getCategories,
   getProducts, 
   getProduct, 
+  getProductReviews,
+  deleteReview,
   addProduct, 
+  updateProduct,
   deleteProduct,
   calculateTotalStockValue,
   calculateCategoryProductCount,

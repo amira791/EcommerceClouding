@@ -26,6 +26,40 @@ END;
 $$
 LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION updateProduct(
+    productId INT,
+    newName VARCHAR(100),
+    newQuantity INT,
+    newPrice DECIMAL(10, 2),
+    newCategoryName VARCHAR(100)
+)
+RETURNS VOID AS $$
+DECLARE
+    categoryId INT;
+BEGIN
+    -- Get the category ID based on the provided category name
+    SELECT idCategory INTO categoryId
+    FROM Categories
+    WHERE name = newCategoryName;
+
+    -- If the category does not exist, raise an exception
+    IF categoryId IS NULL THEN
+        RAISE EXCEPTION 'Category % does not exist', newCategoryName;
+    END IF;
+
+    -- Update the product with the new information
+    UPDATE Products
+    SET
+        Name = COALESCE(newName, Name),
+        quantity = COALESCE(newQuantity, quantity),
+        price = COALESCE(newPrice, price),
+        idCategory = COALESCE(categoryId, idCategory)
+    WHERE
+        idProduct = productId;
+END;
+$$ LANGUAGE plpgsql;
+
+
 
 CREATE OR REPLACE FUNCTION ListProducts()
 RETURNS TABLE(idProduct INT, Name VARCHAR, quantity INT, price DECIMAL) AS $$
@@ -72,13 +106,13 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION FilterProductsByQuantity(minQuantity INT)
+CREATE OR REPLACE FUNCTION FilterProductsByQuantity(maxQuantity INT)
 RETURNS TABLE(idProduct INT, Name VARCHAR, quantity INT, price DECIMAL) AS $$
 BEGIN
     RETURN QUERY
     SELECT idProduct, Name, quantity, price
     FROM Products
-    WHERE quantity >= minQuantity;
+    WHERE quantity <= maxQuantity;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -106,16 +140,46 @@ $$
 LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION GetProductDetails(productId INT)
-RETURNS TABLE(ProductName VARCHAR, Quantity INT, Price DECIMAL, Rating INT, Comment TEXT) AS $$
+CREATE OR REPLACE FUNCTION GetProductDetails(id INT)
+RETURNS TABLE(Name VARCHAR, Quantity INT, Price DECIMAL, Category VARCHAR, Rating INT, Comment TEXT) AS $$
 BEGIN
     RETURN QUERY
-    SELECT p.Name, p.quantity, p.price, r.Rating, r.comment
+    SELECT p.Name, p.quantity, p.price, c.name, r.Rating, r.comment
     FROM Products p
     LEFT JOIN Reviews r ON p.idProduct = r.productId
-    WHERE p.idProduct = productId;
+    JOIN categories c ON c.idCategory = p.idCategory 
+    WHERE p.idProduct = id;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION getProductReviews(id INT)
+RETURNS TABLE (
+    idReview INT,
+    UserId INT,
+    Username VARCHAR(50),
+    Email VARCHAR(100),
+    Address VARCHAR(255),
+    Rating INT,
+    Date DATE,
+    comment TEXT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        r.idReview, 
+        r.UserId, 
+        u.Username, 
+        u.Email, 
+        u.Address,
+        r.Rating, 
+        r.Date, 
+        r.comment
+    FROM Reviews r
+    JOIN Users u ON r.UserId = u.idUser
+    WHERE r.productId = id;
+END;
+$$ LANGUAGE plpgsql;
+
 
 
 CREATE OR replace FUNCTION category_with_most_products()

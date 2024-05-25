@@ -8,7 +8,7 @@ function List() {
 
   
   const [products,setProducts] = useState(Array.from({ length: 20 }, (_, index) => ({
-    idProduct: index + 1,
+    idproduct: index + 1,
     name: `Product ${index + 1}`,
     price: `$${(index + 1) * 10}`,
     quantity: index + 1,
@@ -23,6 +23,9 @@ function List() {
   ]);
 
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [maxPrice,setMaxPrice] = useState('')
+  const [maxQuantity,setMaxQuantity] = useState('')
+  const [searchKeyword, setSearchKeyword] = useState('');
 
 
   useEffect(() => {
@@ -53,24 +56,47 @@ function List() {
       console.error('Error fetching data from the server:', error);
     });
   }, [selectedCategory]); 
+  useEffect(() => {
+    // Check if both startDate and endDate are set
+    if ( maxPrice!== null) {
+      axios.get(`http://localhost:4000/api/v1/products/filterByPrice/${maxPrice}`)
+      .then(response => {
+        setProducts(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching data from the server:', error);
+      });
+    }
+  }, [maxPrice]); 
+
+  useEffect(() => {
+    // Check if both startDate and endDate are set
+    if ( maxPrice!== null) {
+      axios.get(`http://localhost:4000/api/v1/products/filterByQuantity/${maxQuantity}`)
+      .then(response => {
+        setProducts(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching data from the server:', error);
+      });
+    }
+  }, [maxQuantity]); 
 
 
   const handleSearchChange = (event) => {
-    // Fetch data from backend based on search query
-    const searchQuery = event.target.value;
-    console.log('Search query:', searchQuery);
+    setSearchKeyword(event.target.value);
   };
 
   const handlePriceChange = (event) => {
     // Fetch data from backend based on max price
     const maxPrice = event.target.value;
-    console.log('Max price:', maxPrice);
+    setMaxPrice(maxPrice)
   };
 
   const handleQuantityChange = (event) => {
     // Fetch data from backend based on min quantity
     const minQuantity = event.target.value;
-    console.log('Min quantity:', minQuantity);
+    setMaxQuantity(maxQuantity)
   };
 
 
@@ -92,7 +118,14 @@ function List() {
       <AddProduct/>
       <div className="grid grid-cols-4 gap-4 px-16 py-2">
         {products.map(product => (
-          <ProductCard key={product.idProduct} product={product} />
+          <ProductCard 
+             key={product.idproduct} 
+             idProduct={product.idproduct} 
+             price={product.price} 
+             name={product.name}
+             category={product.category}
+             user={product.user}
+             quantity={product.quantity} />
         ))}
       </div>
       
