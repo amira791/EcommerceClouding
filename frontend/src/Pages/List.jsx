@@ -9,6 +9,7 @@ function List() {
   
   const [products,setProducts] = useState(Array.from({ length: 20 }, (_, index) => ({
     idproduct: index + 1,
+    idproduct: index + 1,
     name: `Product ${index + 1}`,
     price: `$${(index + 1) * 10}`,
     quantity: index + 1,
