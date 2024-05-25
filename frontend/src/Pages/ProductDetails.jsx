@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { FaArrowLeft, FaStar, FaTrash } from 'react-icons/fa'; 
 import Navbar from '../Components/Navbar';
